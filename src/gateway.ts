@@ -3,6 +3,7 @@ import path from "node:path";
 import * as fs from "node:fs";
 import type { ResolvedQQBotAccount, WSPayload, C2CMessageEvent, GuildMessageEvent, GroupMessageEvent } from "./types.js";
 import { getAccessToken, getGatewayUrl, sendC2CMessage, sendChannelMessage, sendGroupMessage, clearTokenCache, sendC2CImageMessage, sendGroupImageMessage, initApiConfig, startBackgroundTokenRefresh, stopBackgroundTokenRefresh, sendC2CInputNotify } from "./api.js";
+import { setProxyUrl } from "./api.js";
 import { loadSession, saveSession, clearSession, type SessionState } from "./session-store.js";
 import { recordKnownUser, flushKnownUsers } from "./known-users.js";
 import { getQQBotRuntime } from "./runtime.js";
@@ -370,6 +371,14 @@ export async function startGateway(ctx: GatewayContext): Promise<void> {
 
     try {
       cleanup();
+
+      // 设置 HTTP 代理
+      setProxyUrl(account.httpProxy);
+      if (account.httpProxy) {
+        log?.info(
+          `[qqbot:${account.accountId}] Using HTTP proxy: ${account.httpProxy}`,
+        );
+      }
 
       // 如果标记了需要刷新 token，则清除缓存
       if (shouldRefreshToken) {

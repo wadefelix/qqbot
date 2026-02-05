@@ -53,7 +53,7 @@ export function resolveDefaultQQBotAccountId(cfg: OpenClawConfig): string {
  */
 export function resolveQQBotAccount(
   cfg: OpenClawConfig,
-  accountId?: string | null
+  accountId?: string | null,
 ): ResolvedQQBotAccount {
   const resolvedAccountId = accountId ?? DEFAULT_ACCOUNT_ID;
   const qqbot = cfg.channels?.qqbot as QQBotChannelConfig | undefined;
@@ -77,6 +77,7 @@ export function resolveQQBotAccount(
       systemPrompt: qqbot?.systemPrompt,
       imageServerBaseUrl: qqbot?.imageServerBaseUrl,
       markdownSupport: qqbot?.markdownSupport ?? true,
+      httpProxy: qqbot?.httpProxy,
     };
     appId = qqbot?.appId ?? "";
   } else {
@@ -93,15 +94,31 @@ export function resolveQQBotAccount(
   } else if (accountConfig.clientSecretFile) {
     // 从文件读取（运行时处理）
     secretSource = "file";
-  } else if (process.env.QQBOT_CLIENT_SECRET && resolvedAccountId === DEFAULT_ACCOUNT_ID) {
+  } else if (
+    process.env.QQBOT_CLIENT_SECRET &&
+    resolvedAccountId === DEFAULT_ACCOUNT_ID
+  ) {
     clientSecret = process.env.QQBOT_CLIENT_SECRET;
     secretSource = "env";
   }
 
   // AppId 也可以从环境变量读取
-  if (!appId && process.env.QQBOT_APP_ID && resolvedAccountId === DEFAULT_ACCOUNT_ID) {
+  if (
+    !appId &&
+    process.env.QQBOT_APP_ID &&
+    resolvedAccountId === DEFAULT_ACCOUNT_ID
+  ) {
     appId = process.env.QQBOT_APP_ID;
   }
+
+  // 解析 HTTP 代理：配置 > 环境变量
+  const httpProxy =
+    accountConfig.httpProxy ||
+    process.env.HTTPS_PROXY ||
+    process.env.HTTP_PROXY ||
+    process.env.https_proxy ||
+    process.env.http_proxy ||
+    undefined;
 
   return {
     accountId: resolvedAccountId,
@@ -111,8 +128,11 @@ export function resolveQQBotAccount(
     clientSecret,
     secretSource,
     systemPrompt: accountConfig.systemPrompt,
-    imageServerBaseUrl: accountConfig.imageServerBaseUrl || process.env.QQBOT_IMAGE_SERVER_BASE_URL,
+    imageServerBaseUrl:
+      accountConfig.imageServerBaseUrl ||
+      process.env.QQBOT_IMAGE_SERVER_BASE_URL,
     markdownSupport: accountConfig.markdownSupport,
+    httpProxy,
     config: accountConfig,
   };
 }
@@ -123,7 +143,13 @@ export function resolveQQBotAccount(
 export function applyQQBotAccountConfig(
   cfg: OpenClawConfig,
   accountId: string,
-  input: { appId?: string; clientSecret?: string; clientSecretFile?: string; name?: string; imageServerBaseUrl?: string }
+  input: {
+    appId?: string;
+    clientSecret?: string;
+    clientSecretFile?: string;
+    name?: string;
+    imageServerBaseUrl?: string;
+  },
 ): OpenClawConfig {
   const next = { ...cfg };
 
@@ -131,11 +157,11 @@ export function applyQQBotAccountConfig(
     // 如果没有设置过 allowFrom，默认设置为 ["*"]
     const existingConfig = (next.channels?.qqbot as QQBotChannelConfig) || {};
     const allowFrom = existingConfig.allowFrom ?? ["*"];
-    
+
     next.channels = {
       ...next.channels,
       qqbot: {
-        ...(next.channels?.qqbot as Record<string, unknown> || {}),
+        ...((next.channels?.qqbot as Record<string, unknown>) || {}),
         enabled: true,
         allowFrom,
         ...(input.appId ? { appId: input.appId } : {}),
@@ -145,23 +171,28 @@ export function applyQQBotAccountConfig(
             ? { clientSecretFile: input.clientSecretFile }
             : {}),
         ...(input.name ? { name: input.name } : {}),
-        ...(input.imageServerBaseUrl ? { imageServerBaseUrl: input.imageServerBaseUrl } : {}),
+        ...(input.imageServerBaseUrl
+          ? { imageServerBaseUrl: input.imageServerBaseUrl }
+          : {}),
       },
     };
   } else {
     // 如果没有设置过 allowFrom，默认设置为 ["*"]
-    const existingAccountConfig = (next.channels?.qqbot as QQBotChannelConfig)?.accounts?.[accountId] || {};
+    const existingAccountConfig =
+      (next.channels?.qqbot as QQBotChannelConfig)?.accounts?.[accountId] || {};
     const allowFrom = existingAccountConfig.allowFrom ?? ["*"];
-    
+
     next.channels = {
       ...next.channels,
       qqbot: {
-        ...(next.channels?.qqbot as Record<string, unknown> || {}),
+        ...((next.channels?.qqbot as Record<string, unknown>) || {}),
         enabled: true,
         accounts: {
           ...((next.channels?.qqbot as QQBotChannelConfig)?.accounts || {}),
           [accountId]: {
-            ...((next.channels?.qqbot as QQBotChannelConfig)?.accounts?.[accountId] || {}),
+            ...((next.channels?.qqbot as QQBotChannelConfig)?.accounts?.[
+              accountId
+            ] || {}),
             enabled: true,
             allowFrom,
             ...(input.appId ? { appId: input.appId } : {}),
@@ -171,7 +202,9 @@ export function applyQQBotAccountConfig(
                 ? { clientSecretFile: input.clientSecretFile }
                 : {}),
             ...(input.name ? { name: input.name } : {}),
-            ...(input.imageServerBaseUrl ? { imageServerBaseUrl: input.imageServerBaseUrl } : {}),
+            ...(input.imageServerBaseUrl
+              ? { imageServerBaseUrl: input.imageServerBaseUrl }
+              : {}),
           },
         },
       },

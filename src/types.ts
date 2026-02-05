@@ -23,6 +23,8 @@ export interface ResolvedQQBotAccount {
   imageServerBaseUrl?: string;
   /** 是否支持 markdown 消息（默认 false，需要机器人具备该权限才能启用） */
   markdownSupport?: boolean;
+  /** HTTP 代理地址 */
+  httpProxy?: string;
   config: QQBotAccountConfig;
 }
 
@@ -43,13 +45,15 @@ export interface QQBotAccountConfig {
   imageServerBaseUrl?: string;
   /** 是否支持 markdown 消息（默认 false，需要机器人具备该权限才能启用） */
   markdownSupport?: boolean;
+  /** HTTP 代理地址，如 http://127.0.0.1:7890 */
+  httpProxy?: string;
 }
 
 /**
  * 富媒体附件
  */
 export interface MessageAttachment {
-  content_type: string;  // 如 "image/png"
+  content_type: string; // 如 "image/png"
   filename?: string;
   height?: number;
   width?: number;

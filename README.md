@@ -13,10 +13,10 @@ QQ 开放平台 Bot API 的 Openclaw 渠道插件，支持 C2C 私聊、群聊 @
 
 </div>
 
-
 ---
 
 ## 📸 使用示例
+
 <div align="center">
 <img width="400" alt="使用示例" src="https://github.com/user-attachments/assets/6f1704ab-584b-497e-8937-96f84ce2958f" />
 <img width="670" height="396" alt="Clipboard_Screenshot_1770366319" src="https://github.com/user-attachments/assets/e21e9292-fb93-41a7-81fe-39eeefe3b01d" />
@@ -36,10 +36,10 @@ QQ 开放平台 Bot API 的 Openclaw 渠道插件，支持 C2C 私聊、群聊 @
 - 📝 **Markdown** - 支持 Markdown 格式
 - 📝 **Command** - 支持Openclaw原生命令
 
-  
 ---
 
 ## ⭐ Star 趋势
+
 <div align="center">
 <img width="666" height="464" alt="star-history-202626 (1)" src="https://github.com/user-attachments/assets/01d123b4-f2a7-45b9-b2ed-b7a344497b4a" />
 
@@ -108,14 +108,15 @@ clawdbot channels add --channel qqbot --token "AppID:AppSecret"
     "qqbot": {
       "enabled": true,
       "appId": "你的AppID",
-      "clientSecret": "你的AppSecret"
+      "clientSecret": "你的AppSecret",
+      "systemPrompt": "你是一个友好的助手",
+      "httpProxy": "http://127.0.0.1:7890"
     }
   }
 }
 ```
 
 ---
-
 
 ## 🚀 使用
 
@@ -158,7 +159,7 @@ npx -y @sliverp/qqbot@1.3.7 upgrade
 ### 源码热更新
 
 ```bash
-git clone https://github.com/sliverp/qqbot.git && cd qqbot 
+git clone https://github.com/sliverp/qqbot.git && cd qqbot
 
 # 运行升级脚本
 bash ./scripts/upgrade.sh
@@ -174,9 +175,6 @@ clawdbot gateway restart
 ```
 
 升级脚本会自动清理旧版本和配置。
-
-
-
 
 ---
 

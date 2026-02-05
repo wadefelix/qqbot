@@ -33,6 +33,8 @@
     "prepack": "npm install --omit=dev"
   },
   "dependencies": {
+    "https-proxy-agent": "^7.0.0",
+    "undici": "^6.0.0",
     "ws": "^8.18.0"
   },
   "bundledDependencies": [
